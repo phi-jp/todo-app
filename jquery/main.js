@@ -13,10 +13,18 @@
 
     $('#addForm').on('submit', function(e) {
       var todo = $(this).find('[name=todo]');
-      addTodo({
-        text: todo.val(),
-        done: false,
-      }, true);
+      var value = todo.val();
+
+      if (value) {
+        // 追加
+        addTodo({
+          text: value,
+          done: false,
+        }, true);
+        // 空にする
+        todo.val('');
+      }
+
       return false;
     });
 
