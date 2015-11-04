@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+ 
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    
+    <title>todo in riot</title>
+    <meta name="description" content="${description}" />
+    
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/riot/2.2.4/riot+compiler.min.js'></script>
+  </head>
+  <body>
+    <app title='Hello, Riot.js'></app>
+  </body>
+</html>
+
+<script type='riot/tag'>
+  <app>
+    <h1>todo</h1>
+
+    <form onsubmit='{add}'>
+      <input name='input' type='text' />
+      <button type='submit'>Add</button>
+    </form>
+    <ul>
+      <li each='{list}' class='{item:true, done:done}'>
+        <input type='checkbox' checked='{done}' onchange='{check}' />
+        <span show='{!edit}' onclick='{focus}'>{title}</span>
+        <input show='{edit}' type='text' value='{title}' onblur='{blur}' />
+      </li>
+    </ul>
+    <button onclick='{archive}'>archive</button>
+
+    <style>
+    app {
+      display: block;
+      max-width: 400px;
+      margin: 5% auto;
+    }
+    app ul {
+      list-style-type: none;
+      padding: 0px;
+    }
+    app ul li.done {
+      text-decoration: line-through;
+      color: hsl(0, 0%, 80%);
+    }
+    </style>
+
+    var KEY = 'todo_riot';
+
+    this.load = function() {
+      if (localStorage.getItem(KEY)) {
+        this.list = JSON.parse(localStorage.getItem(KEY));
+      }
+      else {
+        this.list = [
+          {
+            title: 'Hello, world!',
+            done: false,
+            edit: false,
+          },
+        ];
+      }
+    };
+    this.save = function() {
+      localStorage.setItem(KEY, JSON.stringify(this.list));
+    };
+
+    this.add = function(e) {
+      if (!this.input.value) return ;
+
+      this.list.push({
+        title: this.input.value,
+        done: false,
+        edit: false,
+      });
+      this.input.value = '';
+      this.save();
+    };
+
+    this.archive = function() {
+      this.list = this.list.filter(function(item) {
+        return item.done === false;
+      });
+      this.save();
+    };
+
+    this.focus = function(e) {
+      console.log(e.item);
+      e.item.edit = true;
+      var input = e.target.nextElementSibling
+      setTimeout(function() {
+        input.focus();
+        input.select();
+      }, 100);
+    };
+
+    this.blur = function(e) {
+      e.item.title = e.target.value;
+      e.item.edit = false;
+
+      this.save();
+    };
+
+    this.check = function(e) {
+      e.item.done = e.target.checked;
+      this.save();
+    };
+
+    this.load();
+
+  </app>
+</script>
+
+<script>
+  riot.mount("*");
+</script>
